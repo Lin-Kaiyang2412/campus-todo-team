@@ -2,9 +2,7 @@ package edu.hbuas.campustodo.service;
 
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 
 class TaskServiceTest {
 
@@ -26,5 +24,32 @@ class TaskServiceTest {
 
         assertThrows(IllegalArgumentException.class,
                 () -> service.addTask("   "));
+    }
+    @Test
+    void shouldCompleteTaskById() {
+        TaskService service = new TaskService();
+        var task = service.addTask("完成实验报告");
+
+        service.completeTask(task.getId());
+
+        assertTrue(task.isCompleted());
+    }
+
+    @Test
+    void shouldRejectCompletingTaskTwice() {
+        TaskService service = new TaskService();
+        var task = service.addTask("完成实验报告");
+        service.completeTask(task.getId());
+
+        assertThrows(IllegalArgumentException.class,
+            () -> service.completeTask(task.getId()));
+    }
+
+    @Test
+    void shouldRejectUnknownTaskId() {
+        TaskService service = new TaskService();
+
+        assertThrows(IllegalArgumentException.class,
+            () -> service.completeTask(999L));
     }
 }
