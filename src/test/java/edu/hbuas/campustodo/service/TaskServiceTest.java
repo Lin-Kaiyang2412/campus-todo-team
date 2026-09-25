@@ -6,7 +6,10 @@ import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class TaskServiceTest {
 
@@ -55,5 +58,12 @@ class TaskServiceTest {
         List<Task> result = service.filterByPriority(Priority.LOW);
 
         assertTrue(result.isEmpty());
+    }
+    @Test
+    void shouldRejectNullPriority() {
+        TaskService service = new TaskService();
+
+        assertThrows(NullPointerException.class,
+            () -> service.filterByPriority(null));
     }
 }
