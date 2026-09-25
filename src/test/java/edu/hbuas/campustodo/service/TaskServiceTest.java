@@ -14,6 +14,25 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class TaskServiceTest {
 
     @Test
+    void shouldAddTask() {
+        TaskService service = new TaskService();
+        var task = service.addTask("完成需求评审");
+
+        assertEquals(1L, task.getId());
+        assertEquals("完成需求评审", task.getTitle());
+        assertFalse(task.isCompleted());
+        assertEquals(1, service.listAll().size());
+    }
+
+    @Test
+    void shouldRejectBlankTitle() {
+        TaskService service = new TaskService();
+
+        assertThrows(IllegalArgumentException.class,
+            () -> service.addTask("   "));
+    }
+
+    @Test
     void shouldUseMediumPriorityByDefault() {
         TaskService service = new TaskService();
 
@@ -59,6 +78,7 @@ class TaskServiceTest {
 
         assertTrue(result.isEmpty());
     }
+
     @Test
     void shouldRejectNullPriority() {
         TaskService service = new TaskService();
