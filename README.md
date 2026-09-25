@@ -2,7 +2,7 @@
 
 CampusTodo 是《软件工程》课程中用于练习 Git 与 GitHub 团队协同开发的 Java 项目。项目采用 Java 17、Maven 和 JUnit 5，可直接使用 IntelliJ IDEA 打开。
 
-当前版本：支持新增、列出和完成任务。
+当前版本：支持新增、列出、完成任务和按优先级筛选任务。
 
 > 重要：上面这一行是合并冲突实验的固定锚点。只有实验任务明确要求时才修改，且不要提前合并其他同学的文字。
 
@@ -65,3 +65,59 @@ git push origin v0.1.0
 - 作者不能批准自己的 Pull Request；评审意见处理完毕且 CI 通过后再合并。
 - 不提交 `.idea/`、`target/`、访问令牌、账号密码或个人隐私数据。
 - 禁止使用 `git push --force` 修改共享的 `main` 分支。
+
+## 7. 使用说明（构建 / 运行 / 测试）
+
+### 7.1 构建
+
+```bash
+mvn -B clean package               # 编译并打包
+mvn -B clean package -DskipTests   # 只编译，不执行测试
+```
+
+构建产物位于 `target/`：`target/classes/`（编译后的字节码）、`target/campus-todo-0.1.0.jar`（打包结果）。
+
+### 7.2 运行
+
+本项目当前是类库（还没有 `main` 方法入口），因此通过单元测试或 `jshell` 交互来验证运行效果：
+
+```bash
+mvn -B compile
+jshell --class-path target/classes
+```
+
+在 `jshell` 中可以直接调用服务类：
+
+```java
+import edu.hbuas.campustodo.service.TaskService;
+var service = new TaskService();
+service.addTask("写实验报告");
+service.listAll();
+```
+
+使用 IntelliJ IDEA 时：**File → Open** 选择本目录的 `pom.xml`，Project SDK 设为 JDK 17，然后在测试类上右键 **Run** 即可。
+
+### 7.3 测试
+
+```bash
+mvn -B test                                        # 运行全部单元测试
+mvn -B test -Dtest=TaskServiceTest                 # 只运行指定测试类
+mvn -B test -Dtest=TaskServiceTest#shouldAddTask   # 只运行指定测试方法
+```
+
+测试报告（Surefire）输出到 `target/surefire-reports/`，其中 `.txt` 为文本摘要、`.xml` 供 CI 解析。
+
+要点：`mvn -B` 使用批处理模式，输出更适合 CI 与日志粘贴；本地首次运行需要联网下载依赖。
+
+## 8. 持续集成（CI）
+
+CI 由 `.github/workflows/ci.yml` 定义，以下两种情况会自动执行 `mvn -B test`：
+
+1. 向 `main` 推送提交（`push`）；
+2. 创建或更新针对 `main` 的 Pull Request（`pull_request`）。
+
+结果查看方式：仓库 **Actions** 标签页，或 Pull Request 页面底部的 **Checks** 区域。每次运行的测试报告以构件 `surefire-reports` 上传，可在运行详情页下载。
+
+![build](https://github.com/Lin-Kaiyang2412/campus-todo-team/actions/workflows/ci.yml/badge.svg)
+
+约定：**CI 未通过（红色 ×）时不得合并 Pull Request**；同一个 PR 内如需修错，应继续在当前功能分支上补充提交，而不是新建分支或强制推送。
